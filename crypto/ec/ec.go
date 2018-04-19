@@ -40,10 +40,6 @@ type PublicKey struct {
 // Sig is an alias for []byte for readability
 type Sig = []byte
 
-func isKnownType(ecType int) bool {
-	return (ECDSA256 == ecType) || (ECDSA512 == ecType) || (ED25519 == ecType)
-}
-
 func generateECDSAKey(c elliptic.Curve, rand io.Reader) (*PrivateKey, error) {
 	ecdsaPrivKey, err := ecdsa.GenerateKey(c, rand)
 	if nil != err {
