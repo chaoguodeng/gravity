@@ -5,8 +5,11 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"encoding/asn1"
 	"errors"
+	"fmt"
 	"io"
+	"math/big"
 
 	"golang.org/x/crypto/ed25519"
 )
@@ -35,6 +38,11 @@ type PrivateKey struct {
 type PublicKey struct {
 	crypto.PublicKey
 	ecType uint // type enum of the underlying EC
+}
+
+//ecdsaSig is a type prepared for unmarshalling the ecdsa signature from []byte to *big.Int
+type ecdsaSig struct {
+	R, S *big.Int
 }
 
 // Sig is an alias for []byte for readability
@@ -94,7 +102,7 @@ func Sign(privKey *PrivateKey, digest []byte) (Sig, error) {
 		sig, err = ecdsaPrivKey.Sign(rand.Reader, digest, nil)
 	case ED25519:
 		ed25519PrivKey, ok := privKey.PrivateKey.(ed25519.PrivateKey)
-		if !ok && (len(ed25519PrivKey) != ed25519.PrivateKeySize) {
+		if !ok || (len(ed25519PrivKey) != ed25519.PrivateKeySize) {
 			err = ErrKeyTampered
 			break
 		}
@@ -105,4 +113,49 @@ func Sign(privKey *PrivateKey, digest []byte) (Sig, error) {
 	}
 
 	return sig, err
+}
+
+// Verify verifies the signature in sig of hash using the public key, pubKey.
+// Its return value records whether the signature is valid.
+func Verify(pubKey *PublicKey, digest []byte, sig Sig) bool {
+	if nil == sig {
+		fmt.Println("Empty sig")
+		return false
+	}
+	switch pubKey.ecType {
+	case ECDSA256:
+		fallthrough
+	case ECDSA512:
+		ecdsaPubKey, ok := pubKey.PublicKey.(*ecdsa.PublicKey)
+		if !ok {
+			fmt.Println("Wrong ecdsaPubKey")
+			return false
+		}
+		// unmarshal the signature for verification
+		var decodedSig ecdsaSig
+		if _, err := asn1.Unmarshal(sig, &decodedSig); nil != err {
+			fmt.Println("unmarshal ecdsaSigL failed")
+			return false
+		}
+		// verify the signature (r,s) on the digest by the corresponding public key
+		if !ecdsa.Verify(ecdsaPubKey, digest, decodedSig.R, decodedSig.S) {
+			fmt.Println("ecdsa.Verify: failed")
+			return false
+		}
+		return true
+
+	case ED25519:
+		ed25519PubKey, ok := pubKey.PublicKey.(ed25519.PublicKey)
+		if !ok || (len(ed25519PubKey) != ed25519.PublicKeySize) {
+			fmt.Println("Wrong ed25519PubKey")
+			return false
+		}
+		if !ed25519.Verify(ed25519PubKey, digest, sig) {
+			fmt.Println("ed25519.Verify: failed")
+			return false
+		}
+		return true
+	}
+
+	return true
 }
