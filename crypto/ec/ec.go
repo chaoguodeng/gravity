@@ -120,35 +120,27 @@ func Verify(pubKey *PublicKey, digest []byte, sig Sig) bool {
 	if nil == sig {
 		return false
 	}
+
 	switch pubKey.ecType {
 	case ECDSA256:
 		fallthrough
 	case ECDSA512:
 		ecdsaPubKey, ok := pubKey.PublicKey.(*ecdsa.PublicKey)
 		if !ok {
-			return false
+			break
 		}
 		// unmarshal the signature for verification
 		var decodedSig ecdsaSig
 		if _, err := asn1.Unmarshal(sig, &decodedSig); nil != err {
-			return false
+			break
 		}
 		// verify the signature (r,s) on the digest by the corresponding public key
-		if !ecdsa.Verify(ecdsaPubKey, digest, decodedSig.R, decodedSig.S) {
-			return false
-		}
-		return true
-
+		return ecdsa.Verify(ecdsaPubKey, digest, decodedSig.R, decodedSig.S)
 	case ED25519:
 		ed25519PubKey, ok := pubKey.PublicKey.(ed25519.PublicKey)
-		if !ok || (len(ed25519PubKey) != ed25519.PublicKeySize) {
-			return false
-		}
-		if !ed25519.Verify(ed25519PubKey, digest, sig) {
-			return false
-		}
-		return true
+		return ok && (len(ed25519PubKey) == ed25519.PublicKeySize) &&
+			ed25519.Verify(ed25519PubKey, digest, sig)
 	}
 
-	return true
+	return false
 }
