@@ -28,10 +28,10 @@ type PublicKey struct {
 // Sig is an alias for []byte for readability
 type Sig = []byte
 
-// EC specifies the api for ec package
-type EC interface {
+// Worker specifies the api for ec package
+type Worker interface {
 	// GenerateKey generates a (priv,pub) EC key pair
-	GenerateKey(uint, io.Reader) (*PrivateKey, *PublicKey, error)
+	GenerateKey(io.Reader) (*PrivateKey, *PublicKey, error)
 	// Sign signs digest with privKey.
 	Sign(privKey *PrivateKey, digest []byte) (Sig, error)
 	// Verify verifies the signature in sig of hash using the public key, pubKey.
