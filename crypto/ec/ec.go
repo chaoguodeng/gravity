@@ -7,7 +7,6 @@ import (
 	"crypto/rand"
 	"encoding/asn1"
 	"errors"
-	"fmt"
 	"io"
 	"math/big"
 
@@ -72,7 +71,7 @@ func GenerateKey(ecType uint, rand io.Reader) (*PrivateKey, *PublicKey, error) {
 	case ECDSA512:
 		privKey, err = generateECDSAKey(elliptic.P521(), rand)
 	case ED25519:
-		privKey.PrivateKey, privKey.PublicKey.PublicKey, err = ed25519.GenerateKey(rand)
+		privKey.PublicKey.PublicKey, privKey.PrivateKey, err = ed25519.GenerateKey(rand)
 	default:
 		privKey, err = nil, ErrECTypeUnsupported
 	}
@@ -119,7 +118,6 @@ func Sign(privKey *PrivateKey, digest []byte) (Sig, error) {
 // Its return value records whether the signature is valid.
 func Verify(pubKey *PublicKey, digest []byte, sig Sig) bool {
 	if nil == sig {
-		fmt.Println("Empty sig")
 		return false
 	}
 	switch pubKey.ecType {
@@ -128,18 +126,15 @@ func Verify(pubKey *PublicKey, digest []byte, sig Sig) bool {
 	case ECDSA512:
 		ecdsaPubKey, ok := pubKey.PublicKey.(*ecdsa.PublicKey)
 		if !ok {
-			fmt.Println("Wrong ecdsaPubKey")
 			return false
 		}
 		// unmarshal the signature for verification
 		var decodedSig ecdsaSig
 		if _, err := asn1.Unmarshal(sig, &decodedSig); nil != err {
-			fmt.Println("unmarshal ecdsaSigL failed")
 			return false
 		}
 		// verify the signature (r,s) on the digest by the corresponding public key
 		if !ecdsa.Verify(ecdsaPubKey, digest, decodedSig.R, decodedSig.S) {
-			fmt.Println("ecdsa.Verify: failed")
 			return false
 		}
 		return true
@@ -147,11 +142,9 @@ func Verify(pubKey *PublicKey, digest []byte, sig Sig) bool {
 	case ED25519:
 		ed25519PubKey, ok := pubKey.PublicKey.(ed25519.PublicKey)
 		if !ok || (len(ed25519PubKey) != ed25519.PublicKeySize) {
-			fmt.Println("Wrong ed25519PubKey")
 			return false
 		}
 		if !ed25519.Verify(ed25519PubKey, digest, sig) {
-			fmt.Println("ed25519.Verify: failed")
 			return false
 		}
 		return true
