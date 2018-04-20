@@ -28,6 +28,7 @@ func TestED25519(t *testing.T) {
 		t.Fatal("the verification shouldn't fail")
 	}
 
+	// corrupt a random byte of the digest
 	digest[7] = ^digest[7]
 	if worker.Verify(pub, digest[:], sig) {
 		t.Fatal("the verification should fail")
