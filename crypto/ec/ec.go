@@ -1,4 +1,13 @@
+// Package ec specifies the exported API
 package ec
+
+// all algorithms of the EC category consists of 3 components as
+// + Worker.GenerateKey() prepares a (priv,pub) pair for later signing and verifying
+// + then Worker.Sign() makes up the signature on the digest of the targeted message based on the private key
+// + finally Worker.Verify()
+
+// currently, there are 3 implementations of Worker
+// ecdsa.Worker256, ecdsa.Worker512, ed25519.Worker
 
 import (
 	"crypto"
