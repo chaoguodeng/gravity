@@ -13,28 +13,16 @@ var (
 	ErrKeyTampered = errors.New("the key provided has been tampered")
 )
 
-// PrivateKey embeds crypto.PrivateKey and PublicKey to achieve generality
-type PrivateKey struct {
-	crypto.PrivateKey
-	PublicKey
-}
-
-// PublicKey embeds crypto.PublicKey to achieve generality
-type PublicKey struct {
-	crypto.PublicKey
-	ecType uint // type enum of the underlying EC
-}
-
 // Sig is an alias for []byte for readability
 type Sig = []byte
 
 // Worker specifies the api for ec package
 type Worker interface {
 	// GenerateKey generates a (priv,pub) EC key pair
-	GenerateKey(io.Reader) (*PrivateKey, *PublicKey, error)
+	GenerateKey(rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error)
 	// Sign signs digest with privKey.
-	Sign(privKey *PrivateKey, digest []byte) (Sig, error)
+	Sign(privKey crypto.PrivateKey, digest []byte) (Sig, error)
 	// Verify verifies the signature in sig of hash using the public key, pubKey.
 	// Its return value records whether the signature is valid.
-	Verify(pubKey *PublicKey, digest []byte, sig Sig) bool
+	Verify(pubKey crypto.PublicKey, digest []byte, sig Sig) bool
 }
