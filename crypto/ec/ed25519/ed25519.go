@@ -15,6 +15,7 @@ import (
 	stdEd25519 "golang.org/x/crypto/ed25519"
 )
 
+
 // PublicKey aliases the standard public key
 type PublicKey = stdEd25519.PublicKey
 
@@ -57,3 +58,4 @@ func (ed *Worker) Verify(pubKey crypto.PublicKey, digest []byte, sig ec.Sig) boo
 
 	return ok && (len(pub) == stdEd25519.PublicKeySize) && stdEd25519.Verify(pub, digest, sig)
 }
+

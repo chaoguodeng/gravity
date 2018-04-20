@@ -1,3 +1,4 @@
+// Package ecdsa implements a wrapper around the standard ecdsa package(ecdsa-256/512) to achieves generality
 package ecdsa
 
 import (
