@@ -1,4 +1,11 @@
+// Package ed25519 implements a wrapper around the standard ed25519 package to achieves generality
 package ed25519
+
+// Note:
+// + keys and the signature are of fixed size as
+//  - 32 bytes for public key
+//  - 64 bytes for private key
+//  - 64 bytes for signature
 
 import (
 	"crypto"
@@ -8,8 +15,11 @@ import (
 	stdEd25519 "golang.org/x/crypto/ed25519"
 )
 
+// PublicKey aliases the standard public key
 type PublicKey = stdEd25519.PublicKey
 
+// PrivateKey extends the standard private key and
+// embeds the standard public key
 type PrivateKey struct {
 	stdEd25519.PrivateKey
 	PublicKey
@@ -41,7 +51,7 @@ func (ed *Worker) Sign(privKey crypto.PrivateKey, digest []byte) (ec.Sig, error)
 }
 
 // Verify verifies the signature in sig of hash using the public key, pubKey.
-// Its return value records whether the signature is valid.
+// It returns value records whether the signature is valid.
 func (ed *Worker) Verify(pubKey crypto.PublicKey, digest []byte, sig ec.Sig) bool {
 	pub, ok := pubKey.(PublicKey)
 
