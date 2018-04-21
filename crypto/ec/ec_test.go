@@ -12,7 +12,7 @@ import (
 )
 
 func runWorker(worker ec.Worker, t *testing.T) {
-	priv, pub, err := worker.GenerateKey(rand.Reader)
+	priv, err := worker.GenerateKey(rand.Reader)
 	if nil != err {
 		t.Fatal(err)
 	}
@@ -25,7 +25,7 @@ func runWorker(worker ec.Worker, t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !worker.Verify(pub, digest[:], sig) {
+	if !worker.Verify(priv.Public(), digest[:], sig) {
 		t.Fatal("the verification shouldn't fail")
 	}
 }

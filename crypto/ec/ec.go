@@ -24,18 +24,24 @@ var (
 	ErrWrongVersion = errors.New("Mismatching unmarshal version")
 )
 
+type PublicKey = crypto.PublicKey
+
+type PrivateKey interface {
+	Public() PublicKey
+}
+
 // Sig is an alias for []byte for readability
 type Sig = []byte
 
 // Worker specifies the api for ec package
 type Worker interface {
 	// GenerateKey generates a (priv,pub) EC key pair
-	GenerateKey(rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error)
+	GenerateKey(rand io.Reader) (PrivateKey, error)
 	// Sign signs digest with privKey.
-	Sign(privKey crypto.PrivateKey, digest []byte) (Sig, error)
+	Sign(privKey PrivateKey, digest []byte) (Sig, error)
 	// Verify verifies the signature in sig of hash using the public key, pubKey.
 	// Its return value records whether the signature is valid.
-	Verify(pubKey crypto.PublicKey, digest []byte, sig Sig) bool
+	Verify(pubKey PublicKey, digest []byte, sig Sig) bool
 }
 
 type Marshaller interface {

@@ -8,13 +8,11 @@ package ed25519
 //  - 64 bytes for signature
 
 import (
-	"crypto"
 	"io"
 
 	"github.com/sammy00/gravity/crypto/ec"
 	stdEd25519 "golang.org/x/crypto/ed25519"
 )
-
 
 // PublicKey aliases the standard public key
 type PublicKey = stdEd25519.PublicKey
@@ -30,19 +28,19 @@ type PrivateKey struct {
 type Worker struct{}
 
 // GenerateKey generates a (priv,pub) EC key pair
-func (ed *Worker) GenerateKey(rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error) {
+func (ed *Worker) GenerateKey(rand io.Reader) (ec.PrivateKey, error) {
 	var privKey PrivateKey
 	var err error
 
 	if privKey.PublicKey, privKey.PrivateKey, err = stdEd25519.GenerateKey(rand); nil != err {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return privKey, privKey.PublicKey, nil
+	return privKey, nil
 }
 
 // Sign signs digest with privKey.
-func (ed *Worker) Sign(privKey crypto.PrivateKey, digest []byte) (ec.Sig, error) {
+func (ed *Worker) Sign(privKey ec.PrivateKey, digest []byte) (ec.Sig, error) {
 	priv, ok := privKey.(PrivateKey)
 	if !ok || (len(priv.PrivateKey) != stdEd25519.PrivateKeySize) {
 		return nil, ec.ErrKeyTampered
@@ -53,9 +51,8 @@ func (ed *Worker) Sign(privKey crypto.PrivateKey, digest []byte) (ec.Sig, error)
 
 // Verify verifies the signature in sig of hash using the public key, pubKey.
 // It returns value records whether the signature is valid.
-func (ed *Worker) Verify(pubKey crypto.PublicKey, digest []byte, sig ec.Sig) bool {
+func (ed *Worker) Verify(pubKey ec.PublicKey, digest []byte, sig ec.Sig) bool {
 	pub, ok := pubKey.(PublicKey)
 
 	return ok && (len(pub) == stdEd25519.PublicKeySize) && stdEd25519.Verify(pub, digest, sig)
 }
-
