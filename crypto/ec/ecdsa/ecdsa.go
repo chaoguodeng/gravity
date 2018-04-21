@@ -2,14 +2,14 @@
 package ecdsa
 
 import (
-	"crypto"
 	stdEcdsa "crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/asn1"
-	"github.com/sammy00/gravity/crypto/ec"
 	"io"
 	"math/big"
+
+	"github.com/sammy00/gravity/crypto/ec"
 )
 
 // PublicKey aliases standard public key
@@ -25,7 +25,7 @@ type ecdsaSig struct {
 }
 
 // Sign signs digest with privKey.
-func (ed worker) Sign(privKey crypto.PrivateKey, digest []byte) (ec.Sig, error) {
+func (ed worker) Sign(privKey ec.PrivateKey, digest []byte) (ec.Sig, error) {
 	ecdsaPrivKey, ok := privKey.(*PrivateKey)
 
 	if !ok {
@@ -36,7 +36,7 @@ func (ed worker) Sign(privKey crypto.PrivateKey, digest []byte) (ec.Sig, error) 
 
 // Verify verifies the signature in sig of hash using the public key, pubKey.
 // Its return value records whether the signature is valid.
-func (ed worker) Verify(pubKey crypto.PublicKey, digest []byte, sig ec.Sig) bool {
+func (ed worker) Verify(pubKey ec.PublicKey, digest []byte, sig ec.Sig) bool {
 	ecdsaPubKey, ok := pubKey.(*PublicKey)
 	if !ok {
 		return false
@@ -48,15 +48,15 @@ func (ed worker) Verify(pubKey crypto.PublicKey, digest []byte, sig ec.Sig) bool
 	return (nil == err) && stdEcdsa.Verify(ecdsaPubKey, digest, decodedSig.R, decodedSig.S)
 }
 
-func generateKey(c elliptic.Curve, rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error) {
+func generateKey(c elliptic.Curve, rand io.Reader) (ec.PrivateKey, error) {
 	privKey := new(PrivateKey)
 	var err error
 
 	if privKey, err = stdEcdsa.GenerateKey(c, rand); nil != err {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return privKey, &privKey.PublicKey, nil
+	return privKey, nil
 }
 
 // Worker256 implements ecdsa-256
@@ -65,7 +65,7 @@ type Worker256 struct {
 }
 
 // GenerateKey generates a (priv,pub) EC key pair
-func (ecdsa256 *Worker256) GenerateKey(rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error) {
+func (ecdsa256 *Worker256) GenerateKey(rand io.Reader) (ec.PrivateKey, error) {
 	return generateKey(elliptic.P256(), rand)
 }
 
@@ -75,6 +75,6 @@ type Worker512 struct {
 }
 
 // GenerateKey generates a (priv,pub) EC key pair
-func (ecdsa512 *Worker512) GenerateKey(rand io.Reader) (crypto.PrivateKey, crypto.PublicKey, error) {
+func (ecdsa512 *Worker512) GenerateKey(rand io.Reader) (ec.PrivateKey, error) {
 	return generateKey(elliptic.P521(), rand)
 }
