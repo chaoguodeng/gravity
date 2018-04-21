@@ -138,8 +138,6 @@ func (w *Worker) UnmarshalPubKey(pubKeyBytes []byte) (ec.PublicKey, error) {
 		return nil, err
 	}
 
-	//pubKey.X.Set(localPubKey.X)
-	//pubKey.Y.Set(localPubKey.Y)
 	pubKey.X = localPubKey.X
 	pubKey.Y = localPubKey.Y
 

@@ -1,7 +1,6 @@
 package secp_test
 
 import (
-	"crypto/ecdsa"
 	"crypto/rand"
 	"testing"
 
@@ -74,7 +73,7 @@ func TestPublicKeyCodec(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pub, ok := priv.Public().(*ecdsa.PublicKey)
+	pub, ok := priv.Public().(*secp.PublicKey)
 	if !ok {
 		t.Fatal("type conversion failed")
 	}
@@ -88,7 +87,7 @@ func TestPublicKeyCodec(t *testing.T) {
 	if nil != err {
 		t.Fatal(err)
 	}
-	pub2, ok := rawPub.(*ecdsa.PublicKey)
+	pub2, ok := rawPub.(*secp.PublicKey)
 
 	// check curve type
 	bc := pub.Curve.(*remoteSECP.KoblitzCurve).BitCurve
