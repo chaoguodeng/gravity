@@ -11,7 +11,7 @@ import (
 func TestMarshalPrivKey(t *testing.T) {
 	worker := new(ed25519.Worker)
 
-	priv, _, err := worker.GenerateKey(rand.Reader)
+	priv, err := worker.GenerateKey(rand.Reader)
 
 	if nil != err {
 		t.Fatal(err)
@@ -61,7 +61,7 @@ func TestMarshalPrivKey(t *testing.T) {
 func TestMarshalPubKey(t *testing.T) {
 	worker := new(ed25519.Worker)
 
-	priv, pub, err := worker.GenerateKey(rand.Reader)
+	priv, err := worker.GenerateKey(rand.Reader)
 
 	if nil != err {
 		t.Fatal(err)
@@ -77,6 +77,7 @@ func TestMarshalPubKey(t *testing.T) {
 
 	marshaller := new(ed25519.Marshaller)
 
+	pub := priv.Public()
 	//MarshalKeys
 	keysBytes, err := marshaller.MarshalPubKey(pub)
 	if nil != err {
@@ -110,7 +111,7 @@ func TestMarshalPubKey(t *testing.T) {
 func TestMarshalSig(t *testing.T) {
 	worker := new(ed25519.Worker)
 
-	priv, _, err := worker.GenerateKey(rand.Reader)
+	priv, err := worker.GenerateKey(rand.Reader)
 
 	if nil != err {
 		t.Fatal(err)

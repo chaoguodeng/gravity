@@ -11,7 +11,7 @@ import (
 func TestED25519(t *testing.T) {
 	worker := new(ed25519.Worker)
 
-	priv, pub, err := worker.GenerateKey(rand.Reader)
+	priv, err := worker.GenerateKey(rand.Reader)
 	if nil != err {
 		t.Fatal(err)
 	}
@@ -24,13 +24,13 @@ func TestED25519(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !worker.Verify(pub, digest[:], sig) {
+	if !worker.Verify(priv.Public(), digest[:], sig) {
 		t.Fatal("the verification shouldn't fail")
 	}
 
 	// corrupt a random byte of the digest
 	digest[7] = ^digest[7]
-	if worker.Verify(pub, digest[:], sig) {
+	if worker.Verify(priv.Public(), digest[:], sig) {
 		t.Fatal("the verification should fail")
 	}
 }
