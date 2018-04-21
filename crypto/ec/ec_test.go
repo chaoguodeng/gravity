@@ -42,5 +42,4 @@ func TestWorker(t *testing.T) {
 
 	secp256k1Worker := new(secp.Worker)
 	runWorker(secp256k1Worker, t)
-
 }
