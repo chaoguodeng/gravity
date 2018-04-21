@@ -11,6 +11,8 @@ import (
 const (
 	marshalVersion   = 1
 	unmarshalVersion = 1
+	privKeySize      = stdEd25519.PrivateKeySize
+	pubKeySize       = stdEd25519.PublicKeySize
 )
 
 // Marshaller works for ed25519 to marshal/unmarshal the privKey, pubKey and sig
@@ -19,12 +21,13 @@ type Marshaller struct{}
 // MarshalPrivKey marshal privKey to []byte where byte[0] records the marshal version
 func (msller *Marshaller) MarshalPrivKey(privKey crypto.PrivateKey) ([]byte, error) {
 	priv, ok := privKey.(PrivateKey)
-	if !ok || (len(priv.PrivateKey) != stdEd25519.PrivateKeySize) {
+	if !ok || (len(priv.PrivateKey) != privKeySize) || (len(priv.PublicKey) != pubKeySize) {
 		return nil, ec.ErrKeyTampered
 	}
 	result := make([]byte, 1)
 	result[0] = byte(marshalVersion)
-	return append(result, priv.PrivateKey...), nil
+	result = append(result, priv.PrivateKey...)
+	return append(result, priv.PublicKey...), nil
 }
 
 // UnmarshalPrivKey unmarshal privKeyBytes to privKey
@@ -33,15 +36,17 @@ func (msller *Marshaller) UnmarshalPrivKey(privKeyBytes []byte) (crypto.PrivateK
 		return nil, ec.ErrWrongVersion
 	}
 	var privKey PrivateKey
-	privKey.PrivateKey = privKeyBytes[1:]
+	offset := 1
+	privKey.PrivateKey = privKeyBytes[offset : offset+privKeySize]
+	offset += privKeySize
+	privKey.PublicKey = privKeyBytes[offset:]
 	return privKey, nil
-
 }
 
 // MarshalPubKey marshal pubKey to []byte where byte[0] records the marshal version
 func (msller *Marshaller) MarshalPubKey(pubKey crypto.PublicKey) ([]byte, error) {
 	pub, ok := pubKey.(PublicKey)
-	if !ok {
+	if !ok || (len(pub) != pubKeySize) {
 		return nil, ec.ErrKeyTampered
 	}
 	result := make([]byte, 1)
@@ -49,7 +54,7 @@ func (msller *Marshaller) MarshalPubKey(pubKey crypto.PublicKey) ([]byte, error)
 	return append(result, pub...), nil
 }
 
-// UnmarshalPubKey unmarshal pubKeyBytes to pubKey
+// UnmarshalPrivKey unmarshal privKeyBytes to privKey
 func (msller *Marshaller) UnmarshalPubKey(pubKeyBytes []byte) (crypto.PublicKey, error) {
 	if len(pubKeyBytes) == 0 || int(pubKeyBytes[0]) != unmarshalVersion {
 		return nil, ec.ErrWrongVersion
@@ -57,7 +62,6 @@ func (msller *Marshaller) UnmarshalPubKey(pubKeyBytes []byte) (crypto.PublicKey,
 	var pubKey PublicKey
 	pubKey = pubKeyBytes[1:]
 	return pubKey, nil
-
 }
 
 // MarshalSig marshal sig to []byte where byte[0] records the marshal version

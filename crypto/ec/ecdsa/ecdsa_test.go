@@ -24,7 +24,7 @@ func TestECDSA256(t *testing.T) {
 	}
 
 	// pubKey, digest and sig are all valid
-	if !wkr256.Verify(pub, digest[:], sig) {
+	if !wkr256.Verify(&(priv.(*ecdsa.PrivateKey).PublicKey), digest[:], sig) {
 		t.Fatal("the verification shouldn't fail")
 	}
 

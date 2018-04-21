@@ -39,11 +39,9 @@ type Worker interface {
 }
 
 type Marshaller interface {
-	MarshalPrivKey(privKey crypto.PrivateKey) ([]byte, error)
-	MarshalPubKey(pubKey crypto.PublicKey) ([]byte, error)
+	MarshalKeys(privKey crypto.PrivateKey) ([]byte, error)
 	MarshalSig(sig Sig) ([]byte, error)
 
-	UnmarshalPrivKey(privKeyBytes []byte) (crypto.PrivateKey, error)
-	UnmarshalPubKey(pubKeyBytes []byte) (crypto.PublicKey, error)
+	UnmarshalKeys(privKeyBytes []byte) (crypto.PrivateKey, error)
 	UnmarshalSig(sigBytes []byte) (Sig, error)
 }

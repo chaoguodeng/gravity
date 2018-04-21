@@ -8,7 +8,57 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-func TestMARSHAL(t *testing.T) {
+func TestMarshalPrivKey(t *testing.T) {
+	worker := new(ed25519.Worker)
+
+	priv, _, err := worker.GenerateKey(rand.Reader)
+
+	if nil != err {
+		t.Fatal(err)
+	}
+
+	rawMsg := []byte("Hello World")
+	digest := sha3.Sum256(rawMsg)
+
+	sig, err := worker.Sign(priv, digest[:])
+	if nil != err {
+		t.Fatal(err)
+	}
+
+	marshaller := new(ed25519.Marshaller)
+
+	//MarshalKeys
+	keysBytes, err := marshaller.MarshalPrivKey(priv)
+	if nil != err {
+		t.Fatal(err)
+	}
+	//UnmarshalKeys
+	priv2, err := marshaller.UnmarshalPrivKey(keysBytes)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !ByteSliceEqual(priv.(ed25519.PrivateKey).PrivateKey, priv2.(ed25519.PrivateKey).PrivateKey) ||
+		!ByteSliceEqual(priv.(ed25519.PrivateKey).PublicKey, priv2.(ed25519.PrivateKey).PublicKey) {
+		t.Fatal("Unmarshal keys failed")
+	}
+
+	//MarshalSig
+	sigBytes, err := marshaller.MarshalSig(sig)
+	if nil != err {
+		t.Fatal(err)
+	}
+	//UnmarshalSig
+	sig2, err := marshaller.UnmarshalSig(sigBytes)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !ByteSliceEqual(sig, sig2) {
+		t.Fatal("Unmarshal sig failed")
+	}
+
+}
+
+func TestMarshalPubKey(t *testing.T) {
 	worker := new(ed25519.Worker)
 
 	priv, pub, err := worker.GenerateKey(rand.Reader)
@@ -27,33 +77,54 @@ func TestMARSHAL(t *testing.T) {
 
 	marshaller := new(ed25519.Marshaller)
 
-	//MarshalPrivKey
-	privKeyBytes, err := marshaller.MarshalPrivKey(priv)
+	//MarshalKeys
+	keysBytes, err := marshaller.MarshalPubKey(pub)
 	if nil != err {
 		t.Fatal(err)
 	}
-	//UnmarshalPrivKey
-	priv2, err := marshaller.UnmarshalPrivKey(privKeyBytes)
-	if nil != err {
-		t.Fatal(err)
-	}
-	if !ByteSliceEqual(priv.(ed25519.PrivateKey).PrivateKey, priv2.(ed25519.PrivateKey).PrivateKey) {
-		t.Fatal("Unmarshal privKey failed")
-	}
-
-	//MarshalPubKey
-	pubKeyBytes, err := marshaller.MarshalPubKey(pub)
-	if nil != err {
-		t.Fatal(err)
-	}
-	//UnmarshalPubKey
-	pub2, err := marshaller.UnmarshalPubKey(pubKeyBytes)
+	//UnmarshalKeys
+	pub2, err := marshaller.UnmarshalPubKey(keysBytes)
 	if nil != err {
 		t.Fatal(err)
 	}
 	if !ByteSliceEqual(pub.(ed25519.PublicKey), pub2.(ed25519.PublicKey)) {
-		t.Fatal("Unmarshal pubKey failed")
+		t.Fatal("Unmarshal keys failed")
 	}
+
+	//MarshalSig
+	sigBytes, err := marshaller.MarshalSig(sig)
+	if nil != err {
+		t.Fatal(err)
+	}
+	//UnmarshalSig
+	sig2, err := marshaller.UnmarshalSig(sigBytes)
+	if nil != err {
+		t.Fatal(err)
+	}
+	if !ByteSliceEqual(sig, sig2) {
+		t.Fatal("Unmarshal sig failed")
+	}
+
+}
+
+func TestMarshalSig(t *testing.T) {
+	worker := new(ed25519.Worker)
+
+	priv, _, err := worker.GenerateKey(rand.Reader)
+
+	if nil != err {
+		t.Fatal(err)
+	}
+
+	rawMsg := []byte("Hello World")
+	digest := sha3.Sum256(rawMsg)
+
+	sig, err := worker.Sign(priv, digest[:])
+	if nil != err {
+		t.Fatal(err)
+	}
+
+	marshaller := new(ed25519.Marshaller)
 
 	//MarshalSig
 	sigBytes, err := marshaller.MarshalSig(sig)
