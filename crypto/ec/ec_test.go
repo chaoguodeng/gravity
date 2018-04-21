@@ -7,6 +7,7 @@ import (
 	"github.com/sammy00/gravity/crypto/ec"
 	"github.com/sammy00/gravity/crypto/ec/ecdsa"
 	"github.com/sammy00/gravity/crypto/ec/ed25519"
+	"github.com/sammy00/gravity/crypto/ec/secp"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -38,4 +39,8 @@ func TestWorker(t *testing.T) {
 
 	ecdsa512Worker := new(ecdsa.Worker512)
 	runWorker(ecdsa512Worker, t)
+
+	secp256k1Worker := new(secp.Worker)
+	runWorker(secp256k1Worker, t)
+
 }
