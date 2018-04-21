@@ -14,3 +14,4 @@ Hello Gravity
 + `ecdsa.Worker256`  
 + `ecdsa.Worker512`    
 + `ed22519.Worker`  
++ `secp.Worker`
